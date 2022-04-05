@@ -2,6 +2,8 @@ const Player = require('../player/model')
 const path = require('path')
 const fs = require('fs')
 const config = require('../../config')
+const bcrypt = require('bcryptjs')
+const jwt = require('jsonwebtoken')
 
 module.exports = {
    signup: async(req, res, next)=>{
@@ -58,6 +60,47 @@ module.exports = {
             })
          }
          next(error)
+      }
+   },
+   signin: async(req, res, next)=>{
+      try {
+         const { email, password } = req.body
+
+         Player.findOne({ email: email }).then((player)=>{
+            if(player){
+               const checkPassword = bcrypt.compareSync(password, player.password)
+               if(checkPassword){
+                  const token = jwt.sign({
+                     player: {
+                        id: player._id,
+                        username: player.username,
+                        email: player.email,
+                        name: player.name,
+                        phoneNumber: player.phoneNumber,
+                        avatar: player.avatar
+                     }
+                  }, config.jwtKey)
+
+                  res.status(200).json({
+                     data: { token }
+                  })
+               }else{
+                  res.status(403).json({ message: 'The password you entered is wrong ' })
+               }
+            }else{
+               res.status(403).json({ message: 'The email you entered is not registered yet' })
+            }
+         }).catch((error)=>{
+            res.status(500).json({
+               message: error.message || `Internal server error`
+            })
+            next()
+         })
+      } catch (error) {
+         res.status(500).json({
+            message: error.message || `Internal server error`
+         })
+         next()
       }
    }
 }
