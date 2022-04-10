@@ -138,5 +138,18 @@ module.exports = {
       } catch (error) {
          res.status(500).json({ message: error.message || 'Internal server error'})                  
       }
+   },
+   historyDetail: async(req, res)=>{
+      try {
+         const { id } = req.params
+         const history = await Transaction.findOne({ _id: id})
+
+         if(!history) return res.status(404).json({ message: "Transaction history not found"})
+
+         res.status(200).json({ data: history })
+
+      } catch (error) {
+         res.status(500).json({ message: error.message || 'Internal server error'})                  
+      }
    }
 }
