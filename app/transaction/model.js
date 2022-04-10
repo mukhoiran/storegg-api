@@ -64,8 +64,8 @@ let transactionSchema = mongoose.Schema({
    },
    status: {
       type: String,
-      enum: ['Pending', 'Success', 'Failed'],
-      default: 'Pending'
+      enum: ['pending', 'success', 'failed'],
+      default: 'pending'
    },
    player: {
       type: mongoose.Schema.Types.ObjectId,
